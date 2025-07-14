@@ -19,7 +19,7 @@ export default function Home() {
   const [tableData, setTableData] = useState<any[]>([]);
   const [datesData, setDatesData] = useState<any[]>([]);
   const [pieChartData, setPieChartData] = useState<any[]>([]);
-  const fetchedRef = useRef(false);
+
 
   const AddHousehold = async (HouseholdName: string) => {
     const storedUser = localStorage.getItem("User");
@@ -50,70 +50,73 @@ export default function Home() {
   };
 
   const gettingTransaction = async () => {
-    try {
-      const storedUser = localStorage.getItem("User");
-      const User = storedUser ? JSON.parse(storedUser) : null;
-
-      const response = await fetch(`/api/transaction?userId=${User._id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!response.ok) throw new Error("Failed to get transactions");
-
-      const householdData = await response.json();
-
-      toast.success("Fetched households successfully!")
-
-
-      const formattedData: any[] = [];
-      const dateSet = new Set();
-      const categoryTotals: Record<string, number> = {};
-
-      (householdData as any[]).forEach((household) => {
-        (household.transactions as any[]).forEach((tx) => {
-          const formattedDate = new Date(tx.date).toISOString().split("T")[0];
-
-          formattedData.push({
-            date: formattedDate,
-            description: tx.description || "No description",
-            amount: `$${tx.amount}`,
-            category: tx.category,
-            account: tx.account,
-            status: tx.type === "income" ? "success" : "fail",
-          });
-
-          dateSet.add(formattedDate);
-
-          const category = tx.category;
-          const amount = parseFloat(tx.amount);
-
-          categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+    const storedUser = localStorage.getItem("User");
+    const User = storedUser ? JSON.parse(storedUser) : null;
+    if (User) {
+      try {
+        const response = await fetch(`/api/transaction?userId=${User._id}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
         });
-      });
 
-      const dates = Array.from(dateSet);
-      const pieData = Object.entries(categoryTotals).map(([category, amount]) => ({
-        category,
-        amount,
-      }));
+        if (!response.ok) throw new Error("Failed to get transactions");
 
-      setTableData(formattedData);
-      setDatesData(dates);
-      setPieChartData(pieData);
+        const householdData = await response.json();
+
+        toast.success("Fetched households successfully!")
 
 
-    } catch (error) {
-      toast.error("Error fetching transactions");
-      console.error("Error:", error);
+        const formattedData: any[] = [];
+        const dateSet = new Set();
+        const categoryTotals: Record<string, number> = {};
+
+        (householdData as any[]).forEach((household) => {
+          (household.transactions as any[]).forEach((tx) => {
+            const formattedDate = new Date(tx.date).toISOString().split("T")[0];
+
+            formattedData.push({
+              date: formattedDate,
+              description: tx.description || "No description",
+              amount: `$${tx.amount}`,
+              category: tx.category,
+              account: tx.account,
+              status: tx.type === "income" ? "success" : "fail",
+            });
+
+            dateSet.add(formattedDate);
+
+            const category = tx.category;
+            const amount = parseFloat(tx.amount);
+
+            categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+          });
+        });
+
+        const dates = Array.from(dateSet);
+        const pieData = Object.entries(categoryTotals).map(([category, amount]) => ({
+          category,
+          amount,
+        }));
+
+        setTableData(formattedData);
+        setDatesData(dates);
+        setPieChartData(pieData);
+
+
+      } catch (error) {
+        toast.error("Error fetching transactions");
+        console.error("Error:", error);
+      }
+    }else
+    {
+      toast.warning("please login")
     }
   };
 
   useEffect(() => {
-    if (!fetchedRef.current) {
-      gettingTransaction();
-      fetchedRef.current = true;
-    }
+
+    gettingTransaction();
+
   }, []);
 
   return (

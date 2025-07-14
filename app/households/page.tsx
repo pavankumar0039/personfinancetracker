@@ -3,13 +3,8 @@
 import React, { useEffect, useState } from 'react'
 import HouseholdSummaryList from '@/components/HouseholdSummaryList';
 import { toast } from 'react-toastify';
-const households = [
-    { name: "Household 1", income: 4000, expenses: 2200 },
-    { name: "Household 2", income: 3200, expenses: 1800 },
-    { name: "Household 3", income: 5000, expenses: 3500 },
-    { name: "Household 4", income: 4500, expenses: 2600 },
-];
-const page = () => {
+
+const Page = () => {
     const [Households, setHouseholds] = useState<any[]>([])
     const gettingHouseholds = async () => {
         try {
@@ -74,4 +69,4 @@ const page = () => {
 
 }
 
-export default page
+export default Page

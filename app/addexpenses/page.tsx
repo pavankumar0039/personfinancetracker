@@ -52,7 +52,7 @@ const AddTransactionForm = () => {
                 throw new Error("Failed to add transaction");
             }
 
-            const data = await response.json();
+            // const data = await response.json();
             toast.success("Transaction added successfully!");
             setForm({
                 account: "",

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { FaCheck, FaTimes } from "react-icons/fa";
+
 
 type Transaction = {
     date: string;

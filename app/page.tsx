@@ -1,103 +1,168 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
+import { FaPlus } from "react-icons/fa";
+
+// Component Imports
+
+import AddHouseholdDrawer from "@/components/AddHouseholdDrawer";
+import CategoryCards from "@/components/CategoryCards";
+import CategoryPieChart from "@/components/CategoryPieChart";
+import DateSelector from "@/components/DateSelector";
+import MonthlyBarChart from "@/components/MonthlyBarChar";
+import TransactionTable from "@/components/TransactionTable";
+
+
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [tableData, setTableData] = useState<any[]>([]);
+  const [datesData, setDatesData] = useState<any[]>([]);
+  const [pieChartData, setPieChartData] = useState<any[]>([]);
+  const fetchedRef = useRef(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const AddHousehold = async (HouseholdName: string) => {
+    const storedUser = localStorage.getItem("User");
+    const User = storedUser ? JSON.parse(storedUser) : null;
+
+    if (User?._id) {
+      try {
+        const response = await fetch("/api/transaction", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: HouseholdName, user: User._id }),
+        });
+
+        if (!response.ok) throw new Error("Failed to add household");
+
+        const data = await response.json();
+        toast.success("Household added successfully!");
+        localStorage.setItem("household", JSON.stringify(data));
+      } catch (error) {
+        toast.error("Error adding household");
+        console.error("Error:", error);
+      }
+    }
+  };
+
+  const handleDateSelect = (date: string) => {
+    console.log("Selected Date:", date);
+  };
+
+  const gettingTransaction = async () => {
+    try {
+      const storedUser = localStorage.getItem("User");
+      const User = storedUser ? JSON.parse(storedUser) : null;
+
+      const response = await fetch(`/api/transaction?userId=${User._id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) throw new Error("Failed to get transactions");
+
+      const householdData = await response.json();
+
+      toast.success("Fetched households successfully!")
+
+
+      const formattedData: any[] = [];
+      const dateSet = new Set();
+      const categoryTotals: Record<string, number> = {};
+
+      (householdData as any[]).forEach((household) => {
+        (household.transactions as any[]).forEach((tx) => {
+          const formattedDate = new Date(tx.date).toISOString().split("T")[0];
+
+          formattedData.push({
+            date: formattedDate,
+            description: tx.description || "No description",
+            amount: `$${tx.amount}`,
+            category: tx.category,
+            account: tx.account,
+            status: tx.type === "income" ? "success" : "fail",
+          });
+
+          dateSet.add(formattedDate);
+
+          const category = tx.category;
+          const amount = parseFloat(tx.amount);
+
+          categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+        });
+      });
+
+      const dates = Array.from(dateSet);
+      const pieData = Object.entries(categoryTotals).map(([category, amount]) => ({
+        category,
+        amount,
+      }));
+
+      setTableData(formattedData);
+      setDatesData(dates);
+      setPieChartData(pieData);
+
+
+    } catch (error) {
+      toast.error("Error fetching transactions");
+      console.error("Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!fetchedRef.current) {
+      gettingTransaction();
+      fetchedRef.current = true;
+    }
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Header Card */}
+      <div className="bg-white shadow-xl p-6 rounded-2xl w-full mx-auto">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-6 pb-3">🏠 Household 1</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Expenses */}
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-red-600 font-medium">Total Expenses</p>
+              <p className="text-2xl font-semibold text-red-700">$1000</p>
+            </div>
+            <span className="text-3xl text-red-400">💸</span>
+          </div>
+
+          {/* Income */}
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-green-600 font-medium">Total Income</p>
+              <p className="text-2xl font-semibold text-green-700">$1000</p>
+            </div>
+            <span className="text-3xl text-green-400">💰</span>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {/* Date Selector */}
+      <DateSelector data={datesData.length > 0 ? datesData : datesData} onDateSelect={handleDateSelect} />
+
+      {/* Category Cards */}
+      <CategoryCards />
+
+      {/* Charts Section */}
+      <div className="flex flex-col items-center justify-start lg:flex-row lg:justify-between md:items-start gap-4 w-full">
+        <div className="w-full lg:w-1/2">
+          <MonthlyBarChart />
+        </div>
+        <div className="w-full lg:w-1/2">
+          <CategoryPieChart data={pieChartData.length > 0 ? pieChartData : []} />
+        </div>
+      </div>
+
+      {/* Transaction Table */}
+      <TransactionTable transactions={tableData} rowsPerPage={10} />
+
+      {/* Add Household */}
+      <AddHouseholdDrawer onAdd={AddHousehold} />
     </div>
   );
 }

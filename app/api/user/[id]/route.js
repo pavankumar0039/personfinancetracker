@@ -1,4 +1,4 @@
-const {userControllers} =require('../../../../controllers/userController')
+import userControllers from '../../../../controllers/userController'
 
 
 async function getUser(request) {
@@ -10,7 +10,7 @@ async function getUser(request) {
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: "Failed to fetch user" }), {
+        return new Response(JSON.stringify({ error: "Failed to fetch user" || error}), {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
@@ -20,8 +20,8 @@ async function getUser(request) {
 
 async function updateUser(request) {
     try {
-        
-        const userId = request.url.split('/').pop(); 
+
+        const userId = request.url.split('/').pop();
         const userData = await request.json();
         const response = await userControllers.updateUser(userId, userData);
         return new Response(JSON.stringify(response), {
@@ -29,55 +29,38 @@ async function updateUser(request) {
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: "Failed to update user" }), {
+        return new Response(JSON.stringify({ error: "Failed to update user" || error}), {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
     }
-   
+
 }
 
 async function deleteUser(request) {
     try {
-        const userId = request.url.split('/').pop(); 
+        const userId = request.url.split('/').pop();
         const response = await userControllers.deleteUser(userId);
         return new Response(JSON.stringify(response), {
             status: 200,
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: "Failed to delete user" }), {
+        return new Response(JSON.stringify({ error: "Failed to delete user" || error}), {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
     }
 }
 
-export async function handler(request) {
-    const { method } = request;
-
-    switch (method) {
-        case "GET":
-            return getUser(request);
-
-        case "PUT":
-            return updateUser(request);
-
-        case "DELETE":
-            return deleteUser(request);
-
-        default:
-            return new Response(
-                JSON.stringify({ error: `Method ${method} Not Allowed` }),
-                {
-                    status: 405,
-                    headers: { "Content-Type": "application/json", Allow: "GET, POST, PUT, DELETE" },
-                }
-            );
-    }
+export async function GET(request) {
+    return getUser(request);
 }
 
+export async function PUT(request) {
+    return updateUser(request);
+}
 
-export const GET = handler;
-export const PUT = handler;
-export const DELETE = handler;
+export async function DELETE(request) {
+    return deleteUser(request);
+}

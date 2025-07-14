@@ -1,4 +1,6 @@
-const {userControllers} = require("../../../controllers/userController");
+
+
+import userControllers from '../../../controllers/userController'
 
 async function getUsers(request) {
     try {
@@ -10,7 +12,7 @@ async function getUsers(request) {
         
     } catch (error) {
        
-        return new Response(JSON.stringify({ error: "Failed to fetch users" }), {
+        return new Response(JSON.stringify({ error: "Failed to fetch users" || error }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
@@ -41,31 +43,10 @@ async function createUser(request) {
 
 
 
-
-
-export async function handler(request) {
-    const { method } = request;
-
-    switch (method) {
-        case "GET":
-            return getUsers(request);
-
-        case "POST":
-            return createUser(request);
-
-        
-        default:
-            return new Response(
-                JSON.stringify({ error: `Method ${method} Not Allowed` }),
-                {
-                    status: 405,
-                    headers: { "Content-Type": "application/json", Allow: "GET, POST, PUT, DELETE" },
-                }
-            );
-    }
+export async function GET(request) {
+    return getUsers(request);
 }
 
-
-export const GET = handler;
-export const POST = handler;
-
+export async function POST(request) {
+    return createUser(request);
+}

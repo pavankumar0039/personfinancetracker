@@ -1,5 +1,6 @@
-const initDB = require('../database/db');
-const User = require('../models/userModel');
+
+import initDB from '../database/db';
+import User from '../models/userModel';
 
 initDB();
 
@@ -88,4 +89,4 @@ const userControllers = {
 }
 
 
-module.exports = { userControllers };
+export default userControllers

@@ -1,4 +1,6 @@
-const mongoose = require('mongoose');
+
+
+import mongoose from 'mongoose';
 
 async function initDB() {
   try {
@@ -25,4 +27,4 @@ async function initDB() {
   }
 }
 
-module.exports = initDB;
+export default initDB

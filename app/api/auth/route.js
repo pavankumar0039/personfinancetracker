@@ -1,4 +1,4 @@
-const {userControllers}=require('../../../controllers/userController')
+import userControllers from '../../../controllers/userController'
 
 async function checkUser(request) {
     try {
@@ -14,28 +14,10 @@ async function checkUser(request) {
             headers: { "Content-Type": "application/json" },
         });
     }
-   
+
 }
 
 
-export async function handler(request) {
-    const { method } = request;
-
-    switch (method) {
-        case "POST":
-            return checkUser(request);
-
-        
-        default:
-            return new Response(
-                JSON.stringify({ error: `Method ${method} Not Allowed` }),
-                {
-                    status: 405,
-                    headers: { "Content-Type": "application/json", Allow: "GET, POST, PUT, DELETE" },
-                }
-            );
-    }
+export async function POST(request) {
+    return checkUser(request);
 }
-
-
-export const POST = handler;

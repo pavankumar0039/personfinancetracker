@@ -1,15 +1,17 @@
-const {householdControllers} = require("../../../../controllers/householdController");
+
+
+import  householdControllers  from "../../../../controllers/householdController"
 
 async function getHousehold(request) {
     try {
-        const householdId = request.url.split('/').pop(); 
+        const householdId = request.url.split('/').pop();
         const response = await householdControllers.getHousehold(householdId);
         return new Response(JSON.stringify(response), {
             status: 200,
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: "Failed to fetch household" }), {
+        return new Response(JSON.stringify({ error: "Failed to fetch household" || error }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
@@ -17,7 +19,7 @@ async function getHousehold(request) {
 }
 async function addTransaction(request) {
     try {
-        const householdId = request.url.split('/').pop(); 
+        const householdId = request.url.split('/').pop();
         const transactionData = await request.json();
         const response = await householdControllers.addTransactionToHousehold(householdId, transactionData);
         return new Response(JSON.stringify(response), {
@@ -25,7 +27,7 @@ async function addTransaction(request) {
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: "Failed to add transaction" }), {
+        return new Response(JSON.stringify({ error: "Failed to add transaction" || error }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
@@ -33,8 +35,8 @@ async function addTransaction(request) {
 }
 async function updateTransaction(request) {
     try {
-        const householdId = request.url.split('/').pop(); 
-        const transactionId = request.headers.get('Transaction-Id'); 
+        const householdId = request.url.split('/').pop();
+        const transactionId = request.headers.get('Transaction-Id');
         const transactionData = await request.json();
         const response = await householdControllers.updateTransactionInHousehold(householdId, transactionId, transactionData);
         return new Response(JSON.stringify(response), {
@@ -42,7 +44,7 @@ async function updateTransaction(request) {
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: "Failed to update transaction" }), {
+        return new Response(JSON.stringify({ error: "Failed to update transaction"  || error}), {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
@@ -50,7 +52,7 @@ async function updateTransaction(request) {
 }
 async function deleteTransaction(request) {
     try {
-        const householdId = request.url.split('/').pop(); 
+        const householdId = request.url.split('/').pop();
         const transactionId = request.headers.get('Transaction-Id');
         const response = await householdControllers.deleteTransactionFromHousehold(householdId, transactionId);
         return new Response(JSON.stringify(response), {
@@ -58,7 +60,7 @@ async function deleteTransaction(request) {
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: "Failed to delete transaction" }), {
+        return new Response(JSON.stringify({ error: "Failed to delete transaction" || error }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
@@ -70,37 +72,19 @@ async function deleteTransaction(request) {
 
 
 
-export async function handler(request)
-{
-    const { method } = request;
-
-    switch (method) {
-        case "GET":
-            return getHousehold(request);
-
-        case "POST":
-            return addTransaction(request);
-
-        case "PUT":
-            return updateTransaction(request);
-
-        case "DELETE":
-            return deleteTransaction(request);
-
-        default:
-            return new Response(
-                JSON.stringify({ error: `Method ${method} Not Allowed` }),
-                {
-                    status: 405,
-                    headers: { "Content-Type": "application/json" },
-                }
-            );
-    }
+export async function GET(request) {
+    return getHousehold(request);
 }
 
+export async function POST(request) {
+    return addTransaction(request);
+}
 
-export const GET = handler;
-export const POST = handler;
-export const PUT = handler;
-export const DELETE = handler;
+export async function PUT(request) {
+    return updateTransaction(request);
+}
+
+export async function DELETE(request) {
+    return deleteTransaction(request);
+}
 

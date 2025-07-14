@@ -1,4 +1,6 @@
-const { householdControllers } = require("../../../controllers/householdController");
+
+
+import householdControllers from "../../../controllers/householdController"
 
 async function getHouseholds(request) {
     try {
@@ -10,7 +12,7 @@ async function getHouseholds(request) {
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: "Failed to fetch households" }), {
+        return new Response(JSON.stringify({ error: "Failed to fetch households" || error }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
@@ -25,35 +27,17 @@ async function createHousehold(request) {
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: "Failed to create household" }), {
+        return new Response(JSON.stringify({ error: "Failed to create household" || error }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
         });
     }
 }
-export async function handler(request) {
-    const { method } = request;
-
-    switch (method) {
-        case "GET":
-            return getHouseholds(request);
-
-        case "POST":
-            return createHousehold(request);
-
-        default:
-            return new Response(
-                JSON.stringify({ error: `Method ${method} Not Allowed` }),
-                {
-                    status: 405,
-                    headers: { "Content-Type": "application/json" },
-                }
-            );
-    }
+export async function GET(request) {
+    return getHouseholds(request);
 }
 
-export const GET = handler;
-export const POST = handler;
-
-
+export async function POST(request) {
+    return createHousehold(request);
+}
 

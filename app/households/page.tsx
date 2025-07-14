@@ -19,9 +19,9 @@ const Page = () => {
             if (!response.ok) {
                 throw new Error("Failed to get households of the user");
             }
-            const householddata = await response.json();
+            const householddata:any[] = await response.json();
             console.log(householddata)
-            const transformedHouseholds = (householddata as any[]).map(household => {
+            const transformedHouseholds = (householddata).map(household => {
                 let income = 0;
                 let expenses = 0;
 

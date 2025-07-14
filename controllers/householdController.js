@@ -1,7 +1,9 @@
 
-const initDB = require('../database/db');
-const householdModel = require('../models/householdModel');
-const transactionModel = require('../models/transactionModel');
+
+
+import initDB from '../database/db';
+import householdModel from '../models/householdModel';
+import transactionModel from '../models/transactionModel';
 
 initDB();
 
@@ -109,4 +111,6 @@ const householdControllers = {
     deleteTransactionFromHousehold
 };
 
-module.exports = { householdControllers };
+
+export default householdControllers;
+

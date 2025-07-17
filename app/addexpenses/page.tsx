@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import { FaMoneyBill, FaTags, FaAlignLeft, FaWallet, FaCalendarAlt } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const AddTransactionForm = () => {
-   
-   
+
+
     const [form, setForm] = useState({
         account: "",
         category: "",
@@ -27,12 +28,12 @@ const AddTransactionForm = () => {
         console.log("Transaction Data:", form);
 
         const household = localStorage.getItem("household");
-        console.log("Household Data:", household);
+
         if (!household) {
             toast.error("No household found. Please create a household first.");
             return;
         }
-        console.log("Household Data:", household);
+
         const householdData = JSON.parse(household);
         const householdId = householdData._id;
 
@@ -53,6 +54,7 @@ const AddTransactionForm = () => {
             }
 
             // const data = await response.json();
+            // alert("Transaction added successfully")
             toast.success("Transaction added successfully!");
             setForm({
                 account: "",
@@ -76,7 +78,7 @@ const AddTransactionForm = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
 
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="text-sm font-medium text-gray-700 mb-1 block">Account</label>
@@ -209,7 +211,9 @@ const AddTransactionForm = () => {
                     </button>
                 </div>
             </form>
+            <ToastContainer />
         </div>
+
     );
 };
 

@@ -31,10 +31,10 @@ const Sidebar = () => {
   const toggleSidebar = () => setIsExpanded((prev) => !prev);
 
   const menuItems = [
-    { icon: <MdDashboard />, label: "Dashboard", href: "/" },
+    { icon: <MdDashboard />, label: "Dashboard", href: "/dashboard" },
     { icon: <FaPlusCircle />, label: "Add Expenses", href: "/addexpenses" },
     { icon: <FaCog />, label: "Settings", href: "/settings" },
-    { icon: <FaUserPlus />, label: "Households", href: "/households" },
+    { icon: <FaUserPlus />, label: "Households", href: "/" },
     {
       icon: <FaUserCircle />,
       label: isLoggedIn ? "Profile" : "Login",  // 👈 dynamic label

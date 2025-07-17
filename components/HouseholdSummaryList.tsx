@@ -1,7 +1,9 @@
+import { ObjectId } from "mongoose";
 import React from "react";
 import { FaPlus, FaHome, FaMoneyBillWave, FaShoppingCart, FaChartPie, FaUsers } from "react-icons/fa";
 
 type Household = {
+    _id:ObjectId
     name: string;
     income: number;
     expenses: number;
@@ -18,9 +20,11 @@ const backgrounds = [
 const HouseholdSummaryList = ({
     households,
     AddHousehold,
+    householdClicked
 }: {
     households: Household[];
     AddHousehold: () => void;
+    householdClicked:(id:ObjectId)=>void
 }) => {
     return (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 p-4">
@@ -29,7 +33,8 @@ const HouseholdSummaryList = ({
                 return (
                     <div
                         key={index}
-                        className={`relative rounded-xl p-5 text-white shadow-md bg-gradient-to-br ${style.gradient} overflow-hidden`}
+                        onClick={()=>householdClicked(house._id)}
+                        className={`relative cursor-pointer rounded-xl p-5 text-white shadow-md bg-gradient-to-br ${style.gradient} overflow-hidden`}
                     >
                         {/* Bokeh-like circles */}
                         <div className="absolute w-24 h-24 rounded-full opacity-20 top-0 left-0 blur-2xl scale-110 z-0 pointer-events-none transition-all duration-300 transform rotate-12" style={{ backgroundColor: style.bubble }}></div>

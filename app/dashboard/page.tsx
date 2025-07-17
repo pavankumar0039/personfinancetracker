@@ -12,6 +12,22 @@ import CategoryPieChart from "@/components/CategoryPieChart";
 import DateSelector from "@/components/DateSelector";
 import MonthlyBarChart from "@/components/MonthlyBarChar";
 import TransactionTable from "@/components/TransactionTable";
+import { ObjectId } from "mongoose";
+
+interface Transaction {
+    date: string;
+    description: string;
+    amount: number;
+    category: string;
+    account: string;
+    type: "income" | "expense";
+}
+
+interface Household {
+    name?: string;
+    transactions?: Transaction[];
+    user?: ObjectId;
+}
 
 
 
@@ -19,9 +35,11 @@ import TransactionTable from "@/components/TransactionTable";
 export default function Home() {
     const [tableData, setTableData] = useState<any[]>([]);
     const [datesData, setDatesData] = useState<any[]>([]);
-    const [pieChartData, setPieChartData] = useState<any[]>([]);
-    const [choosingHouseHold, setchoosingHouseHold] = useState(false)
 
+    const [pieChartData, setPieChartData] = useState<any[]>([]);
+    const [totalincome, settotalincome] = useState(0)
+    const [totalexpense, settotalexpense] = useState(0)
+    const [household, sethousehold] = useState<Household>({})
 
     const AddHousehold = async (HouseholdName: string) => {
         const storedUser = localStorage.getItem("User");
@@ -74,14 +92,15 @@ export default function Home() {
             if (!response.ok) throw new Error("Failed to get transactions");
 
             const householdData = await response.json();
-            console
+            sethousehold(householdData);
             toast.success("Fetched households successfully!")
 
 
             const formattedData: any[] = [];
             const dateSet = new Set();
             const categoryTotals: Record<string, number> = {};
-
+            let totalIncome = 0;
+            let totalExpense = 0;
 
             (householdData.transactions as any[]).forEach((tx) => {
                 const formattedDate = new Date(tx.date).toISOString().split("T")[0];
@@ -93,7 +112,15 @@ export default function Home() {
                     category: tx.category,
                     account: tx.account,
                     status: tx.type === "income" ? "success" : "fail",
+                    type:tx.type
                 });
+
+                if (tx.type == "income") {
+                    totalIncome = totalIncome + parseFloat(tx.amount)
+
+                } else {
+                    totalExpense = totalExpense + parseFloat(tx.amount)
+                }
 
                 dateSet.add(formattedDate);
 
@@ -110,6 +137,8 @@ export default function Home() {
                 amount,
             }));
 
+            settotalincome(totalIncome)
+            settotalexpense(totalExpense)
             setTableData(formattedData);
             setDatesData(dates);
             setPieChartData(pieData);
@@ -136,7 +165,7 @@ export default function Home() {
                     <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
                         <div>
                             <p className="text-sm text-red-600 font-medium">Total Expenses</p>
-                            <p className="text-2xl font-semibold text-red-700">$1000</p>
+                            <p className="text-2xl font-semibold text-red-700">${totalexpense}</p>
                         </div>
                         <span className="text-3xl text-red-400">💸</span>
                     </div>
@@ -145,7 +174,7 @@ export default function Home() {
                     <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
                         <div>
                             <p className="text-sm text-green-600 font-medium">Total Income</p>
-                            <p className="text-2xl font-semibold text-green-700">$1000</p>
+                            <p className="text-2xl font-semibold text-green-700">${totalincome}</p>
                         </div>
                         <span className="text-3xl text-green-400">💰</span>
                     </div>
@@ -156,7 +185,7 @@ export default function Home() {
             <DateSelector data={datesData.length > 0 ? datesData : datesData} onDateSelect={handleDateSelect} />
 
             {/* Category Cards */}
-            <CategoryCards />
+            <CategoryCards householdData={household} />
 
             {/* Charts Section */}
             <div className="flex flex-col items-center justify-start lg:flex-row lg:justify-between md:items-start gap-4 w-full">

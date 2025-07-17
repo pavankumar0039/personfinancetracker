@@ -10,6 +10,7 @@ type Transaction = {
     category: string;
     account: string;
     status: string;
+    type:string
 };
 
 type Props = {
@@ -117,7 +118,7 @@ const TransactionTable = ({ transactions, rowsPerPage = 5 }: Props) => {
                                     <td className="py-3 px-2">{(currentPage - 1) * rowsPerPage + index + 1}</td>
                                     <td className="py-3 px-2">{tx.date}</td>
                                     <td className="py-3 px-2">{tx.description}</td>
-                                    <td className="py-3 px-2">{tx.amount}</td>
+                                    {tx.type=="income"?<td className="py-3 px-2 text-green-800">+ {tx.amount}</td>:<td className="py-3 px-2 text-red-800">+ {tx.amount}</td>}
                                     <td className="py-3 px-2">{tx.category}</td>
                                     <td className="py-3 px-2">{tx.account}</td>
                                 </tr>

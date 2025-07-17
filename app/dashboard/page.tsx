@@ -13,6 +13,8 @@ import DateSelector from "@/components/DateSelector";
 import MonthlyBarChart from "@/components/MonthlyBarChar";
 import TransactionTable from "@/components/TransactionTable";
 import { ObjectId } from "mongoose";
+import CalendarSchedule from "@/components/CalenderSchedule";
+import ScheduleCalendar from "@/components/CalenderSchedule";
 
 interface Transaction {
     date: string;
@@ -112,7 +114,7 @@ export default function Home() {
                     category: tx.category,
                     account: tx.account,
                     status: tx.type === "income" ? "success" : "fail",
-                    type:tx.type
+                    type: tx.type
                 });
 
                 if (tx.type == "income") {
@@ -158,34 +160,38 @@ export default function Home() {
     return (
         <div className="flex flex-col gap-6">
             {/* Header Card */}
-            <div className="bg-white shadow-xl p-6 rounded-2xl w-full mx-auto">
-                <h1 className="text-3xl font-semibold text-gray-800 mb-6 pb-3">🏠 Household 1</h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Expenses */}
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-red-600 font-medium">Total Expenses</p>
-                            <p className="text-2xl font-semibold text-red-700">${totalexpense}</p>
+            <div className="flex flex-col gap-4 lg:flex-row md:gap-4">
+                <div className="bg-white shadow-xl p-6 rounded-2xl w-full mx-auto">
+                    <h1 className="text-3xl font-semibold text-gray-800 mb-6 pb-3">🏠 Household 1</h1>
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                        {/* Expenses */}
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-red-600 font-medium">Total Expenses</p>
+                                <p className="text-2xl font-semibold text-red-700">${totalexpense}</p>
+                            </div>
+                            <span className="text-3xl text-red-400">💸</span>
                         </div>
-                        <span className="text-3xl text-red-400">💸</span>
-                    </div>
 
-                    {/* Income */}
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-green-600 font-medium">Total Income</p>
-                            <p className="text-2xl font-semibold text-green-700">${totalincome}</p>
+                        {/* Income */}
+                        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-green-600 font-medium">Total Income</p>
+                                <p className="text-2xl font-semibold text-green-700">${totalincome}</p>
+                            </div>
+                            <span className="text-3xl text-green-400">💰</span>
                         </div>
-                        <span className="text-3xl text-green-400">💰</span>
                     </div>
                 </div>
+                {/* <ScheduleCalendar /> */}
+                {/* Date Selector */}
+                <DateSelector data={datesData.length > 0 ? datesData : datesData} onDateSelect={handleDateSelect} />
             </div>
-
-            {/* Date Selector */}
-            <DateSelector data={datesData.length > 0 ? datesData : datesData} onDateSelect={handleDateSelect} />
 
             {/* Category Cards */}
             <CategoryCards householdData={household} />
+
+
 
             {/* Charts Section */}
             <div className="flex flex-col items-center justify-start lg:flex-row lg:justify-between md:items-start gap-4 w-full">

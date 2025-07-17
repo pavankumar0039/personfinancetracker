@@ -3,7 +3,9 @@
 import Login from '@/components/Login'
 import { useRouter } from 'next/navigation';
 import React from 'react'
-import { toast } from 'react-toastify';
+
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 type userDataTypes = {
     name?: string; email: string; password: string; type: string
 };
@@ -27,8 +29,7 @@ const Page = () => {
                 }
                 const userdata = await response.json();
                 console.log(userdata)
-                toast.success("User added successfully!");
-                
+                toast.success("User  successfully signedIn!");
                 localStorage.setItem('User', JSON.stringify(userdata))
                 router.push('/')
 
@@ -51,10 +52,10 @@ const Page = () => {
                     throw new Error("Failed to add user");
                 }
                 const userdata = await response.json();
-                toast.success("User added successfully!");
                 localStorage.setItem('User', JSON.stringify(userdata))
-                router.push('/')
+                toast.success("User signed up successfully, please login");
 
+               
             } catch (error) {
                 toast.error("Error adding user");
                 console.log("error adding user", error)
@@ -67,6 +68,7 @@ const Page = () => {
     return (
         <div>
             <Login onSubmit={(loginUserDetails) => LoginClicked(loginUserDetails)} />
+            <ToastContainer />
         </div>
     )
 }

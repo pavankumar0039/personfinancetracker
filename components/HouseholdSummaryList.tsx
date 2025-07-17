@@ -19,11 +19,11 @@ const backgrounds = [
 
 const HouseholdSummaryList = ({
     households,
-    AddHousehold,
+   
     householdClicked
 }: {
     households: Household[];
-    AddHousehold: () => void;
+    
     householdClicked:(id:ObjectId)=>void
 }) => {
     return (
@@ -59,15 +59,7 @@ const HouseholdSummaryList = ({
             })}
 
             {/* Add Household Button */}
-            <div>
-                <button
-                    className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition duration-300 z-50"
-                    title="Add Household"
-                    onClick={AddHousehold}
-                >
-                    <FaPlus className="text-xl" />
-                </button>
-            </div>
+           
         </div>
     );
 };

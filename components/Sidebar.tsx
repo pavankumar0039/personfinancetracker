@@ -17,14 +17,14 @@ const Sidebar = () => {
 
   const [isExpanded, setIsExpanded] = useState(true);
   const [hasMounted, setHasMounted] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 👈 auth state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     setHasMounted(true);
-    const storedUser = localStorage.getItem('User');
+    const storedUser = localStorage.getItem("User");
     const User = storedUser ? JSON.parse(storedUser) : null;
     setIsLoggedIn(!!User);
-  }, []);
+  }, [pathname]);
 
   if (!hasMounted) return null;
 

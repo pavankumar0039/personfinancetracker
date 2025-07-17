@@ -52,28 +52,37 @@ const DateSelector: React.FC<DateSelectorProps> = ({ data, onDateSelect }) => {
     };
 
     const handleSubmit = () => {
-        if (!selectedYear) {
-            toast.error("Please select a year.");
-            return;
-        }
+        if (!selectedYear) return toast.error("Please select a year.");
+        if (selectedMonthIndex === null) return toast.error("Please select a month.");
 
-        if (selectedMonthIndex === null) {
-            toast.error("Please select a month.");
-            return;
-        }
+        const monthStr = String(selectedMonthIndex + 1).padStart(2, "0"); // e.g. "07"
+        const yearStr = String(selectedYear); // e.g. "2025"
 
-        const monthStr = String(selectedMonthIndex + 1).padStart(2, "0");
-        const finalDate = `${selectedYear}-${monthStr}-${selectedDay}`;
+        if (selectedDay) {
+            const dayStr = String(selectedDay).padStart(2, "0"); // e.g. "17"
+            const fullDate = `${yearStr}-${monthStr}-${dayStr}`; // "2025-07-17"
 
-        // If selected date not in data, warn but still allow
-        if (!data.includes(finalDate)) {
-            toast.warn(`No transactions found on ${selectedDay} ${monthsFull[selectedMonthIndex]} ${selectedYear}`);
+            if (!data.includes(fullDate)) {
+                toast.warn(`No transactions found on ${selectedDay} ${monthsFull[selectedMonthIndex]} ${selectedYear}`);
+            } else {
+                toast.success(`Selected Date: ${fullDate}`);
+            }
+
+            onDateSelect?.(fullDate);
         } else {
-            toast.success(`Selected Date: ${finalDate}`);
-        }
+            const monthPrefix = `${yearStr}-${monthStr}`; // "2025-07"
+            const hasMonthData = data.some(date => date.startsWith(monthPrefix));
 
-        if (onDateSelect) onDateSelect(finalDate);
+            if (!hasMonthData) {
+                toast.warn(`No transactions found for ${monthsFull[selectedMonthIndex]} ${selectedYear}`);
+            } else {
+                toast.success(`Showing transactions for ${monthsFull[selectedMonthIndex]} ${selectedYear}`);
+            }
+
+            onDateSelect?.(monthPrefix); // Pass only year-month if no day selected
+        }
     };
+
 
     const resetAll = () => {
         setSelectedYear(null);
@@ -82,72 +91,77 @@ const DateSelector: React.FC<DateSelectorProps> = ({ data, onDateSelect }) => {
     };
 
     return (
-        <div className="w-full mx-auto px-6 py-2 pb-6 bg-white rounded-xl shadow-md space-y-4">
+        <div className="w-full max-w-xl mx-auto px-6 py-6 bg-white rounded-2xl shadow-lg ">
             <ToastContainer position="top-right" autoClose={2500} />
-            <div className="py-1">
-                <h2 className="text-xl font-bold text-gray-800 m-0 p-0">Select Date</h2>
-                <p className="text-sm text-gray-600 p-0 m-0">You can check particular details of your transactions.</p>
+
+            <div className="mb-4">
+                <h2 className="text-2xl font-bold text-gray-800">Select a Date</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                    Choose a specific date to check your transaction history.
+                </p>
             </div>
-            <p className="text-md text-gray-700 pb-2 m-0 ">
+
+            <div className="text-md text-gray-700 mb-4">
                 <strong>Tracking Date:</strong>{" "}
                 {selectedYear
-                    ? `${selectedDay == null ? "" : selectedDay} ${selectedMonthIndex != null ? monthsFull[selectedMonthIndex] : ""} ${selectedYear}`
+                    ? `${selectedDay ?? "??"} ${monthsFull[selectedMonthIndex ?? 0]} ${selectedYear}`
                     : "Not selected"}
-            </p>
+            </div>
+
 
             {/* Year Selector */}
             {!selectedYear && (
-                <div>
-                    <p className="text-gray-600 font-medium mb-2">Select Year</p>
-                    <div className="flex flex-wrap gap-2">
+                <section className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">1️⃣ Select Year</h3>
+                    <div className="flex flex-wrap gap-3">
                         {years.map((year) => (
                             <button
                                 key={year}
                                 onClick={() => setSelectedYear(year)}
-                                className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm"
+                                className="px-4 py-2 rounded-lg bg-blue-100 hover:bg-blue-200 text-sm font-medium"
                             >
                                 {year}
                             </button>
                         ))}
                     </div>
-                </div>
+                </section>
             )}
 
             {/* Month Selector */}
             {selectedYear && selectedMonthIndex === null && (
-                <div>
-                    <p className="text-gray-600 font-medium mb-2">Select Month</p>
-                    <div className="grid grid-cols-4 gap-2">
-                        {monthsFull.map((name, idx) => {
+                <section className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">2️⃣ Select Month</h3>
+                    <div className="grid grid-cols-4 gap-3">
+                        {monthsFull.map((month, idx) => {
                             const hasData = validDatesByMonth[idx]?.size > 0;
                             return (
                                 <button
                                     key={idx}
                                     onClick={() => handleMonthClick(idx)}
-                                    className={`px-3 py-2 rounded-md text-sm 
-                                        ${hasData ? "bg-blue-300" : "bg-gray-100"}
-                                        hover:bg-gray-200`}
+                                    className={`px-3 py-2 rounded-lg text-sm font-medium 
+                    ${hasData ? "bg-blue-400 text-white" : "bg-gray-200 text-gray-600"}
+                    hover:bg-blue-500 hover:text-white transition`}
                                 >
-                                    {name}
+                                    {month}
                                 </button>
                             );
                         })}
                     </div>
                     <button
                         onClick={resetAll}
-                        className="mt-4 text-sm text-blue-600 hover:underline"
+                        className="mt-4 inline-block text-sm text-blue-600 cursor-pointer"
                     >
-                        Change Year
+                        🔁 Change Year
                     </button>
-                </div>
+                </section>
             )}
 
             {/* Day Selector */}
             {selectedYear && selectedMonthIndex !== null && (
-                <div>
-                    <p className="text-gray-600 font-medium mb-2">
-                        Select Day in {monthsFull[selectedMonthIndex]} {selectedYear}
-                    </p>
+                <section className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                        3️⃣ Select Day in {monthsFull[selectedMonthIndex]} {selectedYear}
+                    </h3>
                     <div className="flex flex-wrap gap-2">
                         {getDaysInMonth(parseInt(selectedYear), selectedMonthIndex).map((day) => {
                             const isValid = validDatesByMonth[selectedMonthIndex]?.has(day);
@@ -155,14 +169,14 @@ const DateSelector: React.FC<DateSelectorProps> = ({ data, onDateSelect }) => {
                                 <button
                                     key={day}
                                     onClick={() => setSelectedDay(day)}
-                                    className={`px-3 py-2 rounded-md text-sm
-                                        ${selectedDay === day
+                                    className={`px-3 py-2 rounded-md text-sm font-medium transition
+                    ${selectedDay === day
                                             ? "bg-blue-600 text-white"
                                             : isValid
-                                                ? "bg-blue-300"
-                                                : "bg-blue-100"
+                                                ? "bg-blue-300 text-white"
+                                                : "bg-gray-100 text-gray-600"
                                         }
-                                        hover:bg-blue-200`}
+                    hover:bg-blue-500 hover:text-white`}
                                 >
                                     {day}
                                 </button>
@@ -172,25 +186,25 @@ const DateSelector: React.FC<DateSelectorProps> = ({ data, onDateSelect }) => {
                     <div className="flex justify-between items-center mt-4">
                         <button
                             onClick={() => setSelectedMonthIndex(null)}
-                            className="text-sm text-blue-500 hover:underline"
+                            className="text-sm text-blue-500 cursor-pointer"
                         >
-                            Change Month
+                            🔁 Change Month
                         </button>
                         <button
                             onClick={resetAll}
-                            className="text-sm text-red-500 hover:underline"
+                            className="text-sm text-red-500 cursor-pointer"
                         >
                             Reset All
                         </button>
                     </div>
-                </div>
+                </section>
             )}
 
             {/* Submit Button */}
-            <div className="pt-2">
+            <div className="flex justify-center">
                 <button
                     onClick={handleSubmit}
-                    className="w-[220px] bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-semibold"
+                    className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-md"
                 >
                     Submit
                 </button>
